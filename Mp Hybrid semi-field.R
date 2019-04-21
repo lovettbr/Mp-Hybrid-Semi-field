@@ -1,6 +1,14 @@
+#Transgenic Metarhizium rapidly kills mosquitoes in
+#a malaria-endemic region of Burkina Faso
+#21 April 2019
+#Brian Lovett
+#Department of Entomology
+#University of Maryland
+#lovettbr@umd.edu
+
 ####Load packages####
-#devtools::install_github('thomasp85/gganimate')
-#devtools::install_github("thomasp85/transformr")
+#install.packages(c("cowplot", "tidyverse", "plotly", "survival", "MASS", "transformr", "scales", "reshape2", "RColorBrewer"))
+#install.packages("gganimate", dependencies=TRUE)
 library(cowplot)
 library(tidyverse)
 library(plotly)
@@ -8,21 +16,19 @@ library(survival)
 library(MASS)
 library(transformr)
 library(gganimate)
-library(tidyverse)
 library(scales)
 library(reshape2)
 library(RColorBrewer)
-packages <-c("ggplot2", "dplyr", "lavaan", "plyr", "cowplot", "rmarkdown", "readr", "caTools", "bitops")
-if(length(setdiff(packages, rownames(installed.packages())))>0){install.packages(setdiff(packages, rownames(installed.packages())))
-}
 
-#### This script creates an R function to generate raincloud plots, then simulates ####
+####This script creates an R function to generate raincloud plots, then simulates ####
 ### data for plots. If using for your own data, you only need lines 1-80. 
 ### It relies largely on code previously written by David Robinson 
 ### (https://gist.github.com/dgrtwo/eb7750e74997891d7c20) and ggplot2 by H Wickham
 ### From https://github.com/RainCloudPlots/RainCloudPlots
-###source("https://gist.githubusercontent.com/benmarwick/2a1bb0133ff568cbe28d/raw/fb53bd97121f7f9ce947837ef1a4c65a73bffb3f/geom_flat_violin.R")
+### source("https://gist.githubusercontent.com/benmarwick/2a1bb0133ff568cbe28d/raw/fb53bd97121f7f9ce947837ef1a4c65a73bffb3f/geom_flat_violin.R")
 #Load packages
+#packages <-c("ggplot2", "dplyr", "lavaan", "plyr", "cowplot", "rmarkdown", "readr", "caTools", "bitops")
+#if(length(setdiff(packages, rownames(installed.packages())))>0){install.packages(setdiff(packages, rownames(installed.packages())))}
 library(ggplot2)
 
 # Defining the geom_flat_violin function. Note: the below code modifies the 
@@ -191,7 +197,7 @@ loc.per.plt=ggplot(dat.loc.per, aes(Location, per, fill=Location))+geom_bar(stat
   xlab("Location captured")+ylab("Number of mosquitoes")+scale_y_continuous(labels = percent_format(accuracy=1))
 loc.per.plt
 
-####Mortality Analysis####
+####Mortality####
 dat.m <- read.csv("Generational_mortality_field.csv")
 
 dat.m2 = dat.m %>%
@@ -201,8 +207,6 @@ dat.m2 = dat.m %>%
   dplyr::mutate(Treatment=factor(Treatment, levels = c("Control", "RFP", "Hybrid")))
 
 ####Generational Development Fecundity####
-
-#Import and format data##
 gen.dat <- read.csv("Generational_development_field.csv")
 
 gen.dat.sum= gen.dat %>%
@@ -229,7 +233,7 @@ gen.plt
 
 ggplotly(gen.plt)
 
-####Persistence script####
+####Persistence####
 per.dat <- read.csv("Persistence_field.csv")
 
 per.dat.mort = per.dat %>%
@@ -264,7 +268,7 @@ per.plt2=ggplot(per.dat.mn, aes(Day, mean, color=Treatment, frame=Week))+geom_li
 animate(per.plt2, fps=5, width=1000)
 #anim_save("per.plt2.gif")
 
-####Lab Fecundity Data####
+####Lab Fecundity####
 f.lab.dat= read.csv("Development_lab.csv")
 
 f.lab.dat4=f.lab.dat %>%
@@ -346,7 +350,6 @@ raincloud_theme = theme(
   axis.line.x = element_line(colour = 'black', size=0.5, linetype='solid'),
   axis.line.y = element_line(colour = 'black', size=0.5, linetype='solid'))
 
-#Works!
 g2 <- ggplot(data = subset(f.lab.dat8, count!=0), aes(y = count, x = Treatment, fill = Stage)) +
   geom_flat_violin(position = position_nudge(x = .2, y = 0), alpha = .7, adjust=7) +
   geom_point(aes(y = count, color = Stage),position = position_jitterdodge(0.2, dodge=.3), size = 1, alpha = 0.8) +
@@ -384,7 +387,6 @@ f.lab.dat2.individual= f.lab.dat %>%
   group_by(Treatment, Stage) %>%
   dplyr::summarize(mean=mean(count, na.rm=T), se=sd(count, na.rm = T)/sqrt(length(count)), n=length(count))
 
-#Works!
 f.lab.dat8= f.lab.dat %>%
   dplyr::mutate(Laid=Eggs>0, Laid=replace_na(Laid, "FALSE")) %>%
   dplyr::select(Treatment, Replicate, Laid, Time.to.lay) %>%
@@ -406,5 +408,5 @@ gen.plt1
 
 gen.plt2=ggplot(data=f.lab.dat2.individual, aes(x=Treatment, y=mean, fill=Stage))+geom_bar(stat="identity", position="dodge")+
   geom_errorbar(limits, position=position_dodge(.9), width=.2) + theme + scale_fill_brewer(palette="Spectral")+
-  ylab("Mean number of mosquitoes")+ggtitle("Development of offspring of individual \nmosquitoes in the lab")
+  ylab("Mean number of mosquitoes")
 gen.plt2
